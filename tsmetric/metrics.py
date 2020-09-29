@@ -83,18 +83,39 @@ def WDTW(series1, series2, wmax=1, g=1):
     
     return prev[-1]
 
-def LCSS(series1, series2, epsilon):
+def LCSS(series1, series2, epsilon=1):
     """
-    Longest common subsequence distance 
+    Longest common sub-sequence (LCSS) distance, implemented using dynamic 
+    programming with state compression. The epsilon defines the threshold for 
+    two real values to be considered as the same.
     
     """
-    pass
+    series1 = series1.reshape(-1)
+    series2 = series2.reshape(-1)
+    m, n = series1.shape[0], series2.shape[0]
+    max_length = max(m, n)
+    
+    prev = [0 for _ in range(n+1)]
+    prev[0] = 0
+    
+    for i in range(1, m+1):
+        cur = [0 for _ in range(n+1)]
+        for j in range(1, n+1):
+            cost = abs(series1[i-1] - series2[j-1])
+            if cost <= epsilon:
+                cur[j] = 1 + prev[j-1]
+            else:
+                cur[j] = max(cur[j-1], prev[j])
+        prev = cur
+    
+    return 1 - prev[-1] / max_length
 
-def EDR(series1, series2):
-    pass
 
 def TWED(series1, series2):
-    pass
+    """
+    Time wrap edit distance (TWED)
+
+    """
 
 def MSM(series1, series2):
     pass
@@ -104,4 +125,5 @@ if __name__ == '__main__':
     
     series1 = np.array([1])
     series2 = np.array([0, 0.25, 1])
-    print(DTW(series1, series2))
+    print(WDTW(series1, series2))
+    
