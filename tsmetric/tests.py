@@ -3,6 +3,12 @@ import numpy as np
 
 import metrics
 
+def test_euclidean():
+    series1 = np.array([1, 2, 3])
+    series2 = np.array([2, 2, 1])
+    distance = metrics.Euclidean(series1, series2)
+    
+    assert distance == 5
 
 def test_dtw():
     series1 = np.array([1, 2, 3])

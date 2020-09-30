@@ -1,6 +1,15 @@
 import numpy as np
 
 
+def Euclidean(series1, series2):
+    series1 = series1.reshape(-1)
+    series2 = series2.reshape(-1)
+    m, n = series1.shape[0], series2.shape[0]
+    assert m == n  # special case
+    diff = series1 - series2
+    
+    return np.matmul(diff.reshape(1, -1), diff.reshape(-1, 1))
+    
 def DTW(series1, series2):
     """
     Dynamic Time Wraping (DTW) distance, implemented using dynamic programming
@@ -111,14 +120,47 @@ def LCSS(series1, series2, epsilon=1):
     return 1 - prev[-1] / max_length
 
 
-def TWED(series1, series2):
+def TWE(series1, series2):
     """
-    Time wrap edit distance (TWED)
+    Time wrap edit (TWE) distance, implemented using dynamic programming with
+    state compression.
 
     """
+    
+    
 
-def MSM(series1, series2):
-    pass
+def MSM(series1, series2, cost=1):
+    """
+    Move-split-merge (MSM) distance, implemented using dynamic programming with
+    state compression.
+    """
+    
+    def _cost(new, x, y, cost):
+        if (new >= x and new <= y) or (new <= x and new >= y):
+            return cost
+        else:
+            return cost + min(abs(new - x), abs(new - y))
+    
+    series1 = series1.reshape(-1)
+    series2 = series2.reshape(-1)
+    m, n = series1.shape[0], series2.shape[0]
+    
+    prev = [0 for _ in range(n)]
+    prev[0] = abs(series1[0] - series2[0])
+    for i in range(1, n):
+        prev[i] = prev[i-1] + _cost(series2[i], series1[0], series2[i-1], cost)
+    
+    for i in range(1, m):
+        cur = [0 for _ in range(n)]
+        cur[0] = prev[0] + _cost(series1[i], series1[i-1], series2[0], cost)
+        for j in range(1, n):
+            dist_1 = prev[j-1] + abs(series1[i] - series2[j])
+            dist_2 = prev[j] + _cost(series1[i], series1[i-1], series2[j], cost)
+            dist_3 = cur[j-1] + _cost(series2[j], series1[i], series2[j-1], cost)
+            cur[j] = min(dist_1, dist_2, dist_3)
+        prev = cur
+    
+    return prev[-1]
 
 
 if __name__ == '__main__':
